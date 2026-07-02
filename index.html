@@ -440,4 +440,1835 @@ h1,h2,h3{ font-family: var(--font-display); margin:0; }
 }
 .news-item a:hover{ color: var(--gold-glow); }
 .news-meta{ display:flex; gap:10px; margin-top:3px; font-size:11px; color: var(--text-dim); }
-.news-loading, .news-erro
+.news-loading, .news-error{ color: var(--text-dim); font-size:13px; }
+
+.disclaimer{
+  font-size:11px; line-height:1.6; color: var(--text-dim); text-align:center;
+  padding: 6px 10px 0;
+}
+
+/* ---------- settings modal ---------- */
+.modal{
+  position:fixed; inset:0; background: rgba(0,0,0,.6);
+  display:flex; align-items:flex-end; justify-content:center; z-index:50;
+}
+.modal.hidden{ display:none; }
+.modal-content{
+  width:100%; max-width:560px; background: var(--surface);
+  border:1px solid var(--border); border-bottom:none;
+  border-radius: 22px 22px 0 0; padding: 22px 20px calc(20px + env(safe-area-inset-bottom));
+}
+.modal-content h2{ font-size:17px; margin-bottom:16px; }
+.setting-label{ display:block; font-size:12.5px; color: var(--text-dim); margin-bottom:10px; font-weight:600; }
+.radio-row{
+  display:flex; align-items:flex-start; gap:10px; padding:11px 10px;
+  border:1px solid var(--border); border-radius: var(--radius-md); margin-bottom:9px; cursor:pointer;
+}
+.radio-row input{ margin-top:4px; accent-color: var(--gold); }
+.radio-row strong{ display:block; font-size:13.5px; font-weight:600; }
+.radio-row small{ display:block; font-size:11.5px; color: var(--text-dim); margin-top:2px; line-height:1.4; }
+.apikey-row{ margin: 4px 0 14px; display:flex; flex-direction:column; gap:6px; }
+.apikey-row.hidden{ display:none; }
+.apikey-row input{
+  background: var(--surface-2); border:1px solid var(--border); color:var(--text);
+  border-radius: 10px; padding:10px 12px; font-family: var(--font-mono); font-size:13px;
+}
+.apikey-row a{ font-size:11.5px; color: var(--gold-glow); }
+.modal-actions{ display:flex; gap:10px; margin-top:6px; }
+.primary-btn, .ghost-btn{
+  flex:1; padding:12px; border-radius:12px; font-family: var(--font-body); font-weight:600;
+  font-size:14px; cursor:pointer; border:1px solid var(--border);
+}
+.primary-btn{ background: var(--gold); color:#141832; border-color: var(--gold); }
+.ghost-btn{ background:transparent; color: var(--text-dim); }
+
+/* ---------- toast ---------- */
+.toast{
+  position:fixed; bottom: calc(18px + env(safe-area-inset-bottom)); left:50%;
+  transform: translateX(-50%); background: var(--surface-2); border:1px solid var(--border);
+  color: var(--text); padding:11px 18px; border-radius:12px; font-size:13px; z-index:60;
+  max-width: 90vw; text-align:center;
+}
+.toast.hidden{ display:none; }
+
+@media (prefers-reduced-motion: reduce){
+  .gauge-needle, .mini-gauge-marker, .tab{ transition:none; }
+}
+
+
+@keyframes spin{ to{ transform:rotate(360deg); } }
+</style>
+</head>
+<body style="background:#141832;color:#FFFFFF;">
+
+<div id="app">
+<div id="initLoader" style="position:fixed;inset:0;background:#141832;display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:12px;">
+  <div style="width:36px;height:36px;border:3px solid #333A5C;border-top-color:#FFB020;border-radius:50%;animation:spin .8s linear infinite;"></div>
+  <span style="color:#8B95A3;font-size:14px;font-family:Arial,sans-serif;">جارٍ التحميل…</span>
+</div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-icon-text">📈</span>
+      <h1>نبض</h1>
+    </div>
+    <button id="settingsBtn" class="icon-btn" aria-label="الإعدادات" type="button">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V19.6a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3.4a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1.1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.09a1.7 1.7 0 0 0 1-1.55V3.4a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h.09a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.09a1.7 1.7 0 0 0 1.55 1H20.6a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z"/></svg>
+    </button>
+  </header>
+
+  <div class="asset-label-badge">🥇 الذهب XAU/USD — تحليل معمق</div>
+
+  <main>
+
+    <section class="price-hero">
+      <div class="price-top">
+        <div class="price-main">
+          <span id="priceValue" class="price-value">—</span>
+          <span id="priceChange" class="price-change">—</span>
+        </div>
+        <div class="price-meta">
+          <span id="priceSource" class="price-source">—</span>
+          <span id="priceUpdated" class="price-updated">—</span>
+        </div>
+      </div>
+      <canvas id="priceChart" class="price-chart"></canvas>
+    </section>
+
+    <section class="conviction-card">
+      <div class="conviction-header">
+        <span class="conviction-label">مؤشر القناعة</span>
+        <span id="recBadge" class="rec-badge rec-neutral">—</span>
+      </div>
+      <div class="gauge">
+        <div class="gauge-track">
+          <div id="gaugeNeedle" class="gauge-needle" style="right:50%"></div>
+        </div>
+        <div class="gauge-labels">
+          <span>بيع قوي</span><span>محايد</span><span>شراء قوي</span>
+        </div>
+      </div>
+      <div id="probabilityBadge" class="probability-badge hidden">—</div>
+    </section>
+
+    <section class="fundamental-card">
+      <h2>🧠 خلاصة التحليل الأساسي (AI)</h2>
+      <p id="fundamentalNote" class="fundamental-note">جارٍ تحليل السياق الأساسي بناءً على أقرب الأخبار المؤثرة على الدولار…</p>
+    </section>
+
+    <section class="reasons-card">
+      <div class="reasons-header">
+        <h2>سبب التوصية</h2>
+        <span id="analysisTime" class="analysis-time">—</span>
+      </div>
+      <ul id="reasonsList" class="reasons-list">
+        <li class="reason-placeholder">جارٍ التحليل…</li>
+      </ul>
+
+      <div id="tradeLevels" class="trade-levels hidden">
+        <div class="trade-level-row">
+          <div class="trade-level-box tl-entry">
+            <span class="tl-label">نقطة الدخول</span>
+            <span id="tlEntry" class="tl-value">—</span>
+          </div>
+          <div class="trade-level-box tl-stop">
+            <span class="tl-label">وقف الخسارة</span>
+            <span id="tlStop" class="tl-value">—</span>
+          </div>
+        </div>
+        <div class="trade-level-row">
+          <div class="trade-level-box tl-tp1">
+            <span class="tl-label">هدف ١</span>
+            <span id="tlTp1" class="tl-value">—</span>
+            <span id="tlTp1Pct" class="tl-pct">—</span>
+          </div>
+          <div class="trade-level-box tl-tp2">
+            <span class="tl-label">هدف ٢</span>
+            <span id="tlTp2" class="tl-value">—</span>
+            <span id="tlTp2Pct" class="tl-pct">—</span>
+          </div>
+        </div>
+        <p id="tlRR" class="tl-rr">—</p>
+        <p class="tl-frozen-note">🔒 هذه المستويات ثابتة ولا تتغير مع حركة السعر — اضغط "تحديث التحليل" لإعادة حسابها.</p>
+      </div>
+
+      <button id="reAnalyzeBtn" class="reanalyze-btn" type="button">
+        🔄 تحديث التحليل وإعادة الحساب
+      </button>
+    </section>
+
+    <section class="indicator-grid">
+
+      <div class="indicator-card">
+        <h3>RSI <span class="ind-sub">14</span><span id="rsiValue" class="ind-value"></span></h3>
+        <div class="mini-gauge">
+          <div class="mini-gauge-track">
+            <div class="mini-gauge-zone zone-low"></div>
+            <div class="mini-gauge-zone zone-mid"></div>
+            <div class="mini-gauge-zone zone-high"></div>
+            <div id="rsiMarker" class="mini-gauge-marker" style="right:50%"></div>
+          </div>
+          <div class="mini-gauge-scale"><span>0</span><span>30</span><span>70</span><span>100</span></div>
+        </div>
+        <p id="rsiNote" class="ind-note">—</p>
+      </div>
+
+      <div class="indicator-card">
+        <h3>MACD <span class="ind-sub">12,26,9</span></h3>
+        <canvas id="macdChart" class="macd-chart"></canvas>
+        <p id="macdNote" class="ind-note">—</p>
+      </div>
+
+      <div class="indicator-card">
+        <h3>أقوى ٣ مستويات فيبوناتشي</h3>
+        <ul id="fibList" class="level-list"></ul>
+      </div>
+
+      <div class="indicator-card">
+        <h3>أقوى الدعوم والمقاومات</h3>
+        <ul id="srList" class="level-list"></ul>
+      </div>
+
+      <div class="indicator-card span-2">
+        <h3>أقوى نمط شموع ياباني ظاهر</h3>
+        <div id="candlePattern" class="candle-pattern">
+          <div class="candle-pattern-info">
+            <span class="candle-pattern-name">—</span>
+          </div>
+          <span class="candle-signal-badge">—</span>
+        </div>
+      </div>
+
+      <div class="indicator-card span-2">
+        <h3>📐 النمط الفني على فريم الساعة</h3>
+        <div id="chartPattern" class="chart-pattern-box neutral hidden">—</div>
+      </div>
+
+    </section>
+
+    <section class="calendar-card">
+      <div class="calendar-header">
+        <h2>📅 تقويم اليوم — أقوى أخبار الدولار 🐂🐂🐂</h2>
+        <button id="notifBtn" class="notif-btn" type="button" title="تفعيل التنبيهات">🔔</button>
+      </div>
+      <p id="notifStatus" class="notif-status"></p>
+      <ul id="calendarList" class="calendar-list">
+        <li class="news-loading">جارٍ تحميل الأحداث…</li>
+      </ul>
+    </section>
+
+    <p class="disclaimer">
+      هذا التطبيق أداة تحليل آلية لأغراض تعليمية، وليس توصية استثمارية أو بديلًا عن قرارك الخاص. التداول في الذهب والعملات الرقمية ينطوي على مخاطر عالية.
+    </p>
+
+  </main>
+</div>
+
+<div id="settingsModal" class="modal hidden">
+  <div class="modal-content">
+    <h2>الإعدادات</h2>
+
+    <div class="setting-group">
+      <label class="setting-label">مصدر سعر الذهب</label>
+
+      <label class="radio-row">
+        <input type="radio" name="goldSource" value="paxg" checked>
+        <span>
+          <strong>PAXG عبر Binance</strong>
+          <small>مجاني تمامًا وبدون مفتاح — عملة مربوطة 1:1 بسعر الذهب</small>
+        </span>
+      </label>
+
+      <label class="radio-row">
+        <input type="radio" name="goldSource" value="twelvedata">
+        <span>
+          <strong>TwelveData</strong>
+          <small>سعر السوق الفعلي XAU/USD — يتطلب مفتاح API مجاني</small>
+        </span>
+      </label>
+
+      <div id="apiKeyRow" class="apikey-row hidden">
+        <input type="text" id="apiKeyInput" placeholder="ضع مفتاح TwelveData هنا" autocomplete="off">
+        <a href="https://twelvedata.com/pricing" target="_blank" rel="noopener">احصل على مفتاح مجاني من TwelveData</a>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button id="saveSettings" class="primary-btn" type="button">حفظ</button>
+      <button id="closeSettings" class="ghost-btn" type="button">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+'use strict';
+
+/* ===================== State ===================== */
+
+const state = {
+  asset: 'gold',
+  goldSource: localStorage.getItem('nabd_goldSource') || 'paxg',
+  apiKey: localStorage.getItem('nabd_twelveDataKey') || '',
+  candles: { gold: [] },
+  frozenLevels: { gold: null },
+  frozenAnalysisTime: { gold: null },
+  refreshTimer: null,
+  calendarTimer: null,
+  loading: false,
+};
+
+const SYMBOLS = { goldPaxg: 'PAXGUSDT' };
+
+const ACCENT = { gold: '#FFB020' };
+
+/* ===================== Helpers ===================== */
+
+function $(id){ return document.getElementById(id); }
+
+function escapeHtml(str){
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function formatPrice(v){
+  if(v == null || isNaN(v)) return '—';
+  if(v >= 1000) return v.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  return v.toFixed(2);
+}
+
+function formatTimeAgo(ts){
+  const diff = Math.max(0, Date.now() - ts);
+  const min = Math.floor(diff / 60000);
+  if(min < 1) return 'الآن';
+  if(min < 60) return `قبل ${min} د`;
+  const hr = Math.floor(min / 60);
+  if(hr < 24) return `قبل ${hr} س`;
+  const day = Math.floor(hr / 24);
+  return `قبل ${day} يوم`;
+}
+
+function showToast(msg, ms = 3200){
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => el.classList.add('hidden'), ms);
+}
+
+/* ===================== Data fetching ===================== */
+
+async function fetchBinanceKlines(symbol, interval = '1h', limit = 300){
+  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('تعذر الاتصال بـ Binance');
+  const data = await res.json();
+  return data.map(k => ({
+    time: k[0],
+    open: parseFloat(k[1]),
+    high: parseFloat(k[2]),
+    low: parseFloat(k[3]),
+    close: parseFloat(k[4]),
+    volume: parseFloat(k[5]),
+  }));
+}
+
+async function fetchBinanceTicker(symbol){
+  const url = `https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('تعذر جلب السعر من Binance');
+  const d = await res.json();
+  return { price: parseFloat(d.lastPrice), changePercent: parseFloat(d.priceChangePercent) };
+}
+
+async function fetchTwelveDataSeries(apikey){
+  const url = `https://api.twelvedata.com/time_series?symbol=XAU/USD&interval=1h&outputsize=200&apikey=${apikey}`;
+  const res = await fetch(url);
+  const d = await res.json();
+  if(d.status === 'error' || !d.values) throw new Error(d.message || 'مفتاح TwelveData غير صالح');
+  return d.values.slice().reverse().map(v => ({
+    time: new Date(v.datetime).getTime(),
+    open: parseFloat(v.open), high: parseFloat(v.high),
+    low: parseFloat(v.low), close: parseFloat(v.close), volume: 0,
+  }));
+}
+
+async function fetchTwelveDataPrice(apikey){
+  const url = `https://api.twelvedata.com/quote?symbol=XAU/USD&apikey=${apikey}`;
+  const res = await fetch(url);
+  const d = await res.json();
+  if(d.status === 'error') throw new Error(d.message || 'تعذر جلب سعر TwelveData');
+  return { price: parseFloat(d.close), changePercent: parseFloat(d.percent_change) };
+}
+
+// Keywords for filtering gold/dollar relevant news
+const GOLD_USD_KEYWORDS = [
+  'gold','xau','federal reserve','fed ','rate','inflation','cpi','pce','nonfarm','nfp',
+  'dollar','dxy','usd','treasury','yield','interest rate','fomc','powell','monetary',
+  'gdp','employment','jobs','payroll','recession','tariff','trade war','geopolit',
+  'safe haven','oil','commodity','bullion','central bank','debt','deficit','surplus',
+  'war','crisis','conflict','sanction','ukraine','middle east','china trade',
+];
+
+function isGoldDollarNews(title){
+  const lower = title.toLowerCase();
+  return GOLD_USD_KEYWORDS.some(kw => lower.includes(kw));
+}
+
+function assessImpact(title){
+  const lower = title.toLowerCase();
+  // Gold impact
+  const goldPos = ['rate cut','dovish','safe haven','geopolit','crisis','conflict','war',
+    'inflation rise','cpi hot','weak dollar','dollar falls','gold rises','gold jumps',
+    'bullion','buying gold','recession fear','tariff'].some(k => lower.includes(k));
+  const goldNeg = ['rate hike','hawkish','strong dollar','dollar surge','risk on',
+    'gold falls','gold drops','gold tumbles','tightening','rate increase'].some(k => lower.includes(k));
+
+  // USD impact
+  const usdPos = ['rate hike','hawkish','strong economy','nfp beat','jobs beat',
+    'gdp beats','dollar rises','dollar rallies','rate increase','fed hike'].some(k => lower.includes(k));
+  const usdNeg = ['rate cut','dovish','weak economy','jobs miss','nfp miss',
+    'dollar falls','dollar drops','recession','deficit','debt ceiling'].some(k => lower.includes(k));
+
+  return {
+    gold: goldPos ? 'pos' : goldNeg ? 'neg' : 'neu',
+    usd:  usdPos  ? 'pos' : usdNeg  ? 'neg' : 'neu',
+  };
+}
+
+const IMPACT_LABELS = {
+  gold: { pos: '🟡 إيجابي للذهب', neg: '🔴 سلبي للذهب', neu: '⬜ محايد للذهب' },
+  usd:  { pos: '🟢 إيجابي للدولار', neg: '🔴 سلبي للدولار', neu: '⬜ محايد للدولار' },
+};
+const IMPACT_CSS = {
+  gold: { pos: 'impact-gold-pos', neg: 'impact-gold-neg', neu: 'impact-gold-neu' },
+  usd:  { pos: 'impact-usd-pos',  neg: 'impact-usd-neg',  neu: 'impact-usd-neu' },
+};
+
+async function fetchBtcNews(){
+  const res = await fetch('https://min-api.cryptocompare.com/data/v2/news/?lang=EN&categories=BTC,Regulation,Blockchain');
+  const d = await res.json();
+  return (d.Data || []).filter(n => n.title).slice(0, 8).map(n => ({
+    title: n.title, url: n.url,
+    source: (n.source_info && n.source_info.name) || n.source || 'مصدر',
+    time: n.published_on * 1000,
+  }));
+}
+
+async function fetchGoldNews(){
+  // ForexLive for macro/gold news
+  const feedUrl = encodeURIComponent('https://www.forexlive.com/feed/news');
+  const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${feedUrl}`);
+  const d = await res.json();
+  if(d.status !== 'ok') throw new Error('تعذر تحميل الأخبار');
+  // Filter to gold/dollar relevant only, top 5
+  const all = (d.items || []).filter(n => isGoldDollarNews(n.title || ''));
+  return all.slice(0, 5).map(n => ({
+    title: n.title, url: n.link, source: 'ForexLive',
+    time: new Date(n.pubDate).getTime(),
+  }));
+}
+
+async function translateToArabic(text){
+  try{
+    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text.slice(0,300))}&langpair=en|ar`);
+    const d = await res.json();
+    return (d.responseData && d.responseData.translatedText) || text;
+  }catch(e){ return text; }
+}
+
+/* ===================== Indicators ===================== */
+
+function computeRSI(closes, period = 14){
+  if(closes.length < period + 1) return null;
+  let gains = 0, losses = 0;
+  for(let i = 1; i <= period; i++){
+    const diff = closes[i] - closes[i - 1];
+    if(diff >= 0) gains += diff; else losses -= diff;
+  }
+  let avgGain = gains / period, avgLoss = losses / period;
+  for(let i = period + 1; i < closes.length; i++){
+    const diff = closes[i] - closes[i - 1];
+    const gain = diff > 0 ? diff : 0;
+    const loss = diff < 0 ? -diff : 0;
+    avgGain = (avgGain * (period - 1) + gain) / period;
+    avgLoss = (avgLoss * (period - 1) + loss) / period;
+  }
+  if(avgLoss === 0) return 100;
+  const rs = avgGain / avgLoss;
+  return 100 - (100 / (1 + rs));
+}
+
+function computeEMA(values, period){
+  const k = 2 / (period + 1);
+  const out = [values[0]];
+  for(let i = 1; i < values.length; i++){
+    out.push(values[i] * k + out[i - 1] * (1 - k));
+  }
+  return out;
+}
+
+function computeMACD(closes){
+  if(closes.length < 35) return null;
+  const ema12 = computeEMA(closes, 12);
+  const ema26 = computeEMA(closes, 26);
+  const macdLine = closes.map((_, i) => ema12[i] - ema26[i]);
+  const signalLine = computeEMA(macdLine, 9);
+  const histogram = macdLine.map((v, i) => v - signalLine[i]);
+  return { macdLine, signalLine, histogram };
+}
+
+function computeFibonacci(candles, lookback = 100){
+  const slice = candles.slice(-lookback);
+  if(slice.length < 10) return null;
+  let high = -Infinity, low = Infinity, highIdx = 0, lowIdx = 0;
+  slice.forEach((c, i) => {
+    if(c.high > high){ high = c.high; highIdx = i; }
+    if(c.low < low){ low = c.low; lowIdx = i; }
+  });
+  const trend = highIdx > lowIdx ? 'up' : 'down';
+  const diff = high - low;
+  const pcts = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+  const levels = pcts.map(p => ({
+    pct: p,
+    price: trend === 'up' ? high - diff * p : low + diff * p,
+  }));
+  return { high, low, trend, levels };
+}
+
+function computeSupportResistance(candles, currentPrice, lookback = 150, leftRight = 3, tolerancePct = 0.0025){
+  const slice = candles.slice(-lookback);
+  if(slice.length < leftRight * 2 + 2) return { supports: [], resistances: [] };
+  const pivots = [];
+  for(let i = leftRight; i < slice.length - leftRight; i++){
+    const win = slice.slice(i - leftRight, i + leftRight + 1);
+    const c = slice[i];
+    // Collect ALL swing highs and lows as raw price levels — we'll classify
+    // them as support/resistance relative to the CURRENT price below, not
+    // by whether they were historically a peak or a trough. A level only
+    // acts as resistance if it currently sits above price, and as support
+    // only if it currently sits below price — regardless of its origin.
+    if(c.high === Math.max(...win.map(w => w.high))) pivots.push({ price: c.high });
+    if(c.low === Math.min(...win.map(w => w.low))) pivots.push({ price: c.low });
+  }
+  function cluster(arr){
+    const sorted = [...arr].sort((a, b) => a.price - b.price);
+    const clusters = [];
+    sorted.forEach(p => {
+      const last = clusters[clusters.length - 1];
+      if(last && Math.abs(p.price - last.avg) / last.avg < tolerancePct){
+        last.prices.push(p.price);
+        last.avg = last.prices.reduce((a, b) => a + b, 0) / last.prices.length;
+        last.strength++;
+      } else {
+        clusters.push({ avg: p.price, prices: [p.price], strength: 1 });
+      }
+    });
+    return clusters.sort((a, b) => b.strength - a.strength);
+  }
+  const allClusters = cluster(pivots);
+  return {
+    supports: allClusters.filter(c => c.avg < currentPrice).slice(0, 3),
+    resistances: allClusters.filter(c => c.avg > currentPrice).sort((a,b) => a.avg - b.avg).slice(0, 3).sort((a,b) => b.strength - a.strength),
+  };
+}
+
+function bodySize(c){ return Math.abs(c.close - c.open); }
+function candleRange(c){ return c.high - c.low; }
+function isBull(c){ return c.close > c.open; }
+function isBear(c){ return c.close < c.open; }
+
+function detectCandlePattern(candles){
+  const n = candles.length;
+  if(n < 3) return null;
+  const c1 = candles[n - 1], c2 = candles[n - 2], c3 = candles[n - 3];
+  const r1 = candleRange(c1) || 0.0001;
+  const lowerWick1 = Math.min(c1.open, c1.close) - c1.low;
+  const upperWick1 = c1.high - Math.max(c1.open, c1.close);
+
+  if(bodySize(c1) <= r1 * 0.1){
+    return { name: 'دوجي (تردد)', bias: 'neutral' };
+  }
+  if(isBear(c2) && isBull(c1) && c1.open <= c2.close && c1.close >= c2.open && bodySize(c1) > bodySize(c2)){
+    return { name: 'ابتلاع صعودي', bias: 'bull' };
+  }
+  if(isBull(c2) && isBear(c1) && c1.open >= c2.close && c1.close <= c2.open && bodySize(c1) > bodySize(c2)){
+    return { name: 'ابتلاع هبوطي', bias: 'bear' };
+  }
+  if(lowerWick1 >= bodySize(c1) * 2 && upperWick1 <= bodySize(c1) * 0.5 && bodySize(c1) <= r1 * 0.35){
+    return { name: 'نموذج المطرقة', bias: 'bull' };
+  }
+  if(upperWick1 >= bodySize(c1) * 2 && lowerWick1 <= bodySize(c1) * 0.5 && bodySize(c1) <= r1 * 0.35){
+    return { name: 'النجمة الهابطة', bias: 'bear' };
+  }
+  if(isBear(c3) && bodySize(c2) < bodySize(c3) * 0.5 && isBull(c1) && c1.close > (c3.open + c3.close) / 2){
+    return { name: 'نجمة الصباح', bias: 'bull' };
+  }
+  if(isBull(c3) && bodySize(c2) < bodySize(c3) * 0.5 && isBear(c1) && c1.close < (c3.open + c3.close) / 2){
+    return { name: 'نجمة المساء', bias: 'bear' };
+  }
+  if(isBull(c3) && isBull(c2) && isBull(c1) && c2.close > c3.close && c1.close > c2.close && c2.open > c3.open && c1.open > c2.open){
+    return { name: 'الجنود الثلاثة البيض', bias: 'bull' };
+  }
+  if(isBear(c3) && isBear(c2) && isBear(c1) && c2.close < c3.close && c1.close < c2.close && c2.open < c3.open && c1.open < c2.open){
+    return { name: 'الغربان الثلاثة السود', bias: 'bear' };
+  }
+  return { name: 'لا يوجد نمط واضح حاليًا', bias: 'neutral' };
+}
+
+/* ===================== Recommendation engine ===================== */
+
+function computeStochastic(candles, period = 14, smoothK = 3, smoothD = 3){
+  if(candles.length < period + smoothK + smoothD) return null;
+  const rawK = [];
+  for(let i = period - 1; i < candles.length; i++){
+    const win = candles.slice(i - period + 1, i + 1);
+    const highest = Math.max(...win.map(c => c.high));
+    const lowest = Math.min(...win.map(c => c.low));
+    const close = candles[i].close;
+    rawK.push(lowest === highest ? 50 : ((close - lowest) / (highest - lowest)) * 100);
+  }
+  const smooth = (arr, n) => arr.map((_, i) => i < n - 1 ? null : arr.slice(i - n + 1, i + 1).reduce((a,b) => a + b, 0) / n).filter(v => v !== null);
+  const k = smooth(rawK, smoothK);
+  const d = smooth(k, smoothD);
+  return { k: k[k.length - 1], d: d[d.length - 1], kPrev: k[k.length - 2], dPrev: d[d.length - 2] };
+}
+
+function computeATR(candles, period = 14){
+  if(candles.length < period + 1) return null;
+  const trs = [];
+  for(let i = 1; i < candles.length; i++){
+    const c = candles[i], p = candles[i - 1];
+    trs.push(Math.max(c.high - c.low, Math.abs(c.high - p.close), Math.abs(c.low - p.close)));
+  }
+  let atr = trs.slice(0, period).reduce((a,b) => a + b, 0) / period;
+  for(let i = period; i < trs.length; i++) atr = (atr * (period - 1) + trs[i]) / period;
+  return atr;
+}
+
+function computeADX(candles, period = 14){
+  if(candles.length < period * 2) return null;
+  let plusDM = [], minusDM = [], trs = [];
+  for(let i = 1; i < candles.length; i++){
+    const up = candles[i].high - candles[i-1].high;
+    const down = candles[i-1].low - candles[i].low;
+    plusDM.push(up > down && up > 0 ? up : 0);
+    minusDM.push(down > up && down > 0 ? down : 0);
+    trs.push(Math.max(candles[i].high - candles[i].low, Math.abs(candles[i].high - candles[i-1].close), Math.abs(candles[i].low - candles[i-1].close)));
+  }
+  const smooth = arr => { let s = arr.slice(0, period).reduce((a,b)=>a+b,0); const out=[s]; for(let i=period;i<arr.length;i++){ s = s - s/period + arr[i]; out.push(s); } return out; };
+  const sTR = smooth(trs), sPDM = smooth(plusDM), sMDM = smooth(minusDM);
+  const diPlus = sPDM.map((v,i) => sTR[i] ? (v / sTR[i]) * 100 : 0);
+  const diMinus = sMDM.map((v,i) => sTR[i] ? (v / sTR[i]) * 100 : 0);
+  const dx = diPlus.map((v,i) => {
+    const sum = v + diMinus[i];
+    return sum ? (Math.abs(v - diMinus[i]) / sum) * 100 : 0;
+  });
+  const adxArr = [];
+  let adx = dx.slice(0, period).reduce((a,b)=>a+b,0) / period;
+  adxArr.push(adx);
+  for(let i = period; i < dx.length; i++){ adx = (adx * (period - 1) + dx[i]) / period; adxArr.push(adx); }
+  return {
+    adx: adxArr[adxArr.length - 1],
+    diPlus: diPlus[diPlus.length - 1],
+    diMinus: diMinus[diMinus.length - 1],
+  };
+}
+
+function computeBollinger(closes, period = 20, mult = 2){
+  if(closes.length < period) return null;
+  const slice = closes.slice(-period);
+  const mean = slice.reduce((a,b) => a + b, 0) / period;
+  const variance = slice.reduce((a,b) => a + (b - mean) ** 2, 0) / period;
+  const sd = Math.sqrt(variance);
+  return { mid: mean, upper: mean + mult * sd, lower: mean - mult * sd, width: (mult * sd * 2) / mean };
+}
+
+function computeEMATrend(closes){
+  if(closes.length < 30) return null;
+  const ema20 = computeEMA(closes, 20);
+  const ema50 = computeEMA(closes, 50);
+  const last20 = ema20[ema20.length - 1], last50 = ema50[ema50.length - 1];
+  const price = closes[closes.length - 1];
+  const aligned = (price > last20 && last20 > last50) ? 'up' : (price < last20 && last20 < last50) ? 'down' : 'mixed';
+  return { ema20: last20, ema50: last50, aligned, price };
+}
+
+// Aggregate hourly candles into a higher timeframe (e.g. 4h) to check
+// higher-timeframe trend alignment — a core piece of "deep" multi-timeframe analysis.
+function aggregateCandles(candles, groupSize = 4){
+  const out = [];
+  for(let i = 0; i < candles.length; i += groupSize){
+    const chunk = candles.slice(i, i + groupSize);
+    if(!chunk.length) continue;
+    out.push({
+      time: chunk[0].time,
+      open: chunk[0].open,
+      high: Math.max(...chunk.map(c => c.high)),
+      low: Math.min(...chunk.map(c => c.low)),
+      close: chunk[chunk.length - 1].close,
+    });
+  }
+  return out;
+}
+
+function buildRecommendation({ rsi, macd, fib, sr, candle, price, stoch, adx, boll, emaTrend, htfTrend, atr }){
+  // ---- Weighted confluence scoring system ----
+  // Each signal contributes a weight reflecting its statistical reliability
+  // in technical analysis practice. Trend/structure signals (EMA alignment,
+  // higher-timeframe trend, S/R) are weighted more heavily than oscillators,
+  // which are prone to false signals in strongly trending markets.
+  let weightedScore = 0;
+  let maxPossible = 0;
+  const reasons = [];
+  const signals = []; // { name, bias, weight } — used for confluence probability
+
+  function addSignal(name, bias, weight, text){
+    maxPossible += weight;
+    if(bias === 'bull') weightedScore += weight;
+    else if(bias === 'bear') weightedScore -= weight;
+    signals.push({ name, bias, weight });
+    reasons.push({ bias, text });
+  }
+
+  // 1) Higher-timeframe trend (4H aggregate) — heaviest weight: "trade with the trend"
+  if(htfTrend){
+    if(htfTrend === 'up') addSignal('htf', 'bull', 3, '📊 الاتجاه على فريم ٤ ساعات صاعد — التوصية تتماشى مع الاتجاه الأكبر (عامل حاسم).');
+    else if(htfTrend === 'down') addSignal('htf', 'bear', 3, '📊 الاتجاه على فريم ٤ ساعات هابط — التوصية تتماشى مع الاتجاه الأكبر (عامل حاسم).');
+    else addSignal('htf', 'neutral', 0, '📊 فريم ٤ ساعات في اتجاه عرضي غير واضح.');
+  }
+
+  // 2) EMA20/50 trend alignment — heavy weight
+  if(emaTrend){
+    if(emaTrend.aligned === 'up') addSignal('ema', 'bull', 2.5, `📈 السعر فوق المتوسطين 20 و50 وهما متصاعدان — اتجاه صعودي مؤكد على الفريم الحالي.`);
+    else if(emaTrend.aligned === 'down') addSignal('ema', 'bear', 2.5, `📉 السعر تحت المتوسطين 20 و50 وهما متنازلان — اتجاه هبوطي مؤكد على الفريم الحالي.`);
+    else addSignal('ema', 'neutral', 0, '➡️ المتوسطات المتحركة متشابكة — لا يوجد اتجاه واضح حاليًا.');
+  }
+
+  // 3) ADX — trend strength filter (not directional by itself, but gates confidence)
+  let trendIsStrong = false;
+  if(adx){
+    trendIsStrong = adx.adx >= 25;
+    if(trendIsStrong){
+      const dir = adx.diPlus > adx.diMinus ? 'bull' : 'bear';
+      addSignal('adx', dir, 2, `💪 مؤشر ADX عند ${adx.adx.toFixed(1)} (أعلى من 25) — يؤكد وجود اتجاه قوي وليس مجرد تذبذب.`);
+    } else {
+      reasons.push({ bias: 'neutral', text: `⚠️ مؤشر ADX عند ${adx.adx.toFixed(1)} (أقل من 25) — السوق في مرحلة تجميع/تذبذب، الحركات الاتجاهية أقل موثوقية الآن.` });
+    }
+  }
+
+  // 4) RSI
+  if(rsi != null){
+    if(rsi <= 30) addSignal('rsi', 'bull', 1.5, `RSI عند ${rsi.toFixed(1)} — تشبع بيعي واضح، يرفع احتمال ارتداد صعودي.`);
+    else if(rsi >= 70) addSignal('rsi', 'bear', 1.5, `RSI عند ${rsi.toFixed(1)} — تشبع شرائي واضح، يرفع احتمال تصحيح هبوطي.`);
+    else if(rsi > 50) addSignal('rsi', 'bull', 0.5, `RSI عند ${rsi.toFixed(1)} — أعلى من المنطقة المتوسطة (50)، يدعم النزعة الصعودية.`);
+    else addSignal('rsi', 'bear', 0.5, `RSI عند ${rsi.toFixed(1)} — أقل من المنطقة المتوسطة (50)، يدعم النزعة الهبوطية.`);
+  }
+
+  // 5) Stochastic — confirms/contradicts RSI (both oscillators agreeing = stronger signal)
+  if(stoch){
+    if(stoch.k <= 20 && stoch.k > stoch.kPrev) addSignal('stoch', 'bull', 1.2, `Stochastic عند ${stoch.k.toFixed(1)} ويتجه للأعلى من منطقة التشبع البيعي — إشارة انعكاس صعودي محتملة.`);
+    else if(stoch.k >= 80 && stoch.k < stoch.kPrev) addSignal('stoch', 'bear', 1.2, `Stochastic عند ${stoch.k.toFixed(1)} ويتجه للأسفل من منطقة التشبع الشرائي — إشارة انعكاس هبوطي محتملة.`);
+    else if(stoch.k > stoch.d) addSignal('stoch', 'bull', 0.4, `Stochastic: خط %K أعلى من %D (${stoch.k.toFixed(1)} > ${stoch.d.toFixed(1)}) — زخم صعودي طفيف.`);
+    else addSignal('stoch', 'bear', 0.4, `Stochastic: خط %K أسفل %D (${stoch.k.toFixed(1)} < ${stoch.d.toFixed(1)}) — زخم هبوطي طفيف.`);
+  }
+
+  // 6) MACD
+  if(macd){
+    const h = macd.histogram, last = h[h.length - 1], prev = h[h.length - 2];
+    if(last > 0 && last > prev) addSignal('macd', 'bull', 1.8, 'MACD: الهيستوجرام موجب ومتصاعد — الزخم الصعودي يتسارع.');
+    else if(last < 0 && last < prev) addSignal('macd', 'bear', 1.8, 'MACD: الهيستوجرام سالب ومتوسع — الزخم الهبوطي يتسارع.');
+    else if(last > 0) addSignal('macd', 'bull', 0.5, 'MACD: الهيستوجرام موجب لكن يتباطأ — الزخم الصعودي يفقد قوته تدريجيًا.');
+    else addSignal('macd', 'bear', 0.5, 'MACD: الهيستوجرام سالب لكن يتباطأ — الزخم الهبوطي يفقد قوته تدريجيًا.');
+  }
+
+  // 7) Bollinger Bands — mean-reversion / volatility context
+  if(boll){
+    const posInBand = (price - boll.lower) / (boll.upper - boll.lower);
+    if(posInBand <= 0.05) addSignal('boll', 'bull', 1, `بولينجر: السعر عند أو تحت الحد السفلي (${formatPrice(boll.lower)}) — تمدد سعري يرفع احتمال ارتداد صعودي.`);
+    else if(posInBand >= 0.95) addSignal('boll', 'bear', 1, `بولينجر: السعر عند أو فوق الحد العلوي (${formatPrice(boll.upper)}) — تمدد سعري يرفع احتمال تصحيح هبوطي.`);
+    else reasons.push({ bias: 'neutral', text: `بولينجر: السعر داخل النطاق الطبيعي (${formatPrice(boll.lower)} – ${formatPrice(boll.upper)}) دون تمدد يُذكر.` });
+  }
+
+  // 8) Fibonacci confluence
+  if(fib){
+    const keyLevels = fib.levels.filter(l => [0.382, 0.5, 0.618].includes(l.pct));
+    const nearest = keyLevels.reduce((a, b) => Math.abs(price - a.price) < Math.abs(price - b.price) ? a : b);
+    const distPct = Math.abs(price - nearest.price) / price;
+    if(distPct < 0.006){
+      if(fib.trend === 'up') addSignal('fib', 'bull', 1.8, `فيبوناتشي: السعر عند تصحيح ${(nearest.pct*100).toFixed(1)}% ويعمل كدعم ضمن الاتجاه الصاعد الأخير — نقطة ارتكاز فنية مهمة.`);
+      else addSignal('fib', 'bear', 1.8, `فيبوناتشي: السعر عند تصحيح ${(nearest.pct*100).toFixed(1)}% ويعمل كمقاومة ضمن الاتجاه الهابط الأخير — نقطة ارتكاز فنية مهمة.`);
+    }
+  }
+
+  // 9) Support/Resistance structure
+  if(sr){
+    const nearSup = sr.supports.find(s => Math.abs(price - s.avg) / price < 0.005);
+    const nearRes = sr.resistances.find(r => Math.abs(price - r.avg) / price < 0.005);
+    if(nearSup) addSignal('sr', 'bull', 2, `الدعم: السعر على دعم قوي عند ${formatPrice(nearSup.avg)} تم اختباره ${nearSup.strength} مرات سابقًا — منطقة ارتكاز موثوقة.`);
+    if(nearRes) addSignal('sr', 'bear', 2, `المقاومة: السعر على مقاومة قوية عند ${formatPrice(nearRes.avg)} تم اختبارها ${nearRes.strength} مرات سابقًا — منطقة ارتكاز موثوقة.`);
+  }
+
+  // 10) Candlestick pattern — short-term confirmation trigger
+  if(candle && candle.bias === 'bull') addSignal('candle', 'bull', 1.3, `نموذج شموع "${candle.name}" — مُحفّز دخول صعودي قصير المدى.`);
+  else if(candle && candle.bias === 'bear') addSignal('candle', 'bear', 1.3, `نموذج شموع "${candle.name}" — مُحفّز دخول هبوطي قصير المدى.`);
+
+  // ---- Overall direction & confluence-based probability ----
+  const bullWeight = signals.filter(s => s.bias === 'bull').reduce((a,s) => a + s.weight, 0);
+  const bearWeight = signals.filter(s => s.bias === 'bear').reduce((a,s) => a + s.weight, 0);
+  const totalWeight = bullWeight + bearWeight;
+  const netScore = bullWeight - bearWeight;
+
+  const pct = maxPossible ? Math.max(-100, Math.min(100, Math.round((netScore / maxPossible) * 100))) : 0;
+
+  let label, cls;
+  const strongThreshold = maxPossible * 0.35;
+  const buyThreshold = maxPossible * 0.12;
+  if(netScore >= strongThreshold){ label = 'شراء قوي'; cls = 'rec-strong-buy'; }
+  else if(netScore >= buyThreshold){ label = 'شراء'; cls = 'rec-buy'; }
+  else if(netScore <= -strongThreshold){ label = 'بيع قوي'; cls = 'rec-strong-sell'; }
+  else if(netScore <= -buyThreshold){ label = 'بيع'; cls = 'rec-sell'; }
+  else { label = 'محايد'; cls = 'rec-neutral'; }
+
+  // Probability of success: derived from confluence ratio (how much of the total
+  // "votes" agree with the dominant direction), scaled into a realistic band.
+  // We deliberately cap it — no technical setup is ever near-certain — and floor
+  // it near coin-flip when signals are weak/contradictory.
+  let probability = null;
+  if(label !== 'محايد' && totalWeight > 0){
+    const dominance = Math.max(bullWeight, bearWeight) / totalWeight; // 0.5 (split) .. 1.0 (unanimous)
+    // Map dominance [0.5, 1.0] -> probability [52%, 84%], and nudge up slightly
+    // if ADX confirms a genuinely strong trend (fewer false breakouts).
+    let raw = 52 + (dominance - 0.5) * (84 - 52) / 0.5;
+    if(trendIsStrong) raw += 4;
+    if(htfTrend && ((label.includes('شراء') && htfTrend === 'up') || (label.includes('بيع') && htfTrend === 'down'))) raw += 3;
+    probability = Math.max(50, Math.min(88, Math.round(raw)));
+  }
+
+  const confluenceCount = signals.filter(s => s.bias === (netScore >= 0 ? 'bull' : 'bear') && s.weight > 0).length;
+  const totalSignalCount = signals.length;
+
+  // -------- compute trade levels (structure + ATR based, for precision) --------
+  const isBuy = netScore > 0 && label !== 'محايد';
+  const isSell = netScore < 0 && label !== 'محايد';
+  let levels = null;
+
+  if(isBuy || isSell){
+    const bufPct = price > 500 ? 0.004 : 0.006;
+    const atrBuf = atr ? atr / price : bufPct * 2;
+
+    const sups = (sr && sr.supports.length) ? [...sr.supports].sort((a,b) => b.avg - a.avg) : [];
+    const ress = (sr && sr.resistances.length) ? [...sr.resistances].sort((a,b) => a.avg - b.avg) : [];
+    const fibPrices = fib ? fib.levels.map(l => l.price) : [];
+
+    if(isBuy){
+      const entry = price;
+      const stopSup = sups.find(s => s.avg < price);
+      // Use whichever stop is tighter/more conservative: structural support or 1x ATR
+      const structStop = stopSup ? stopSup.avg * (1 - bufPct / 2) : null;
+      const atrStop = price * (1 - atrBuf);
+      const stop = structStop ? Math.max(structStop, atrStop) : atrStop;
+
+      const tp1Res = ress.find(r => r.avg > price * 1.001);
+      const tp1 = tp1Res ? tp1Res.avg : price * (1 + atrBuf * 1.5);
+      const tp2ResArr = ress.filter(r => r.avg > (tp1 + price * 0.001));
+      const tp2Fib = fibPrices.filter(p => p > tp1 + price * 0.001).sort((a,b)=>a-b)[0];
+      const tp2Candidates = [...tp2ResArr.map(r=>r.avg), tp2Fib].filter(Boolean).sort((a,b)=>a-b);
+      const tp2 = tp2Candidates[0] || price * (1 + atrBuf * 3);
+
+      const risk = entry - stop;
+      const rr1 = risk > 0 ? ((tp1 - entry) / risk).toFixed(1) : '—';
+      const rr2 = risk > 0 ? ((tp2 - entry) / risk).toFixed(1) : '—';
+      levels = {
+        direction: 'buy', entry, stop, tp1, tp2,
+        tp1Pct: (((tp1 - entry) / entry) * 100).toFixed(2),
+        tp2Pct: (((tp2 - entry) / entry) * 100).toFixed(2),
+        stopPct: (((entry - stop) / entry) * 100).toFixed(2),
+        rrText: `نسبة المخاطرة للعائد: هدف١ = 1:${rr1} | هدف٢ = 1:${rr2}`,
+      };
+    } else {
+      const entry = price;
+      const stopRes = ress.find(r => r.avg > price);
+      const structStop = stopRes ? stopRes.avg * (1 + bufPct / 2) : null;
+      const atrStop = price * (1 + atrBuf);
+      const stop = structStop ? Math.min(structStop, atrStop) : atrStop;
+
+      const tp1Sup = sups.find(s => s.avg < price * 0.999);
+      const tp1 = tp1Sup ? tp1Sup.avg : price * (1 - atrBuf * 1.5);
+      const tp2SupArr = sups.filter(s => s.avg < (tp1 - price * 0.001));
+      const tp2Fib = fibPrices.filter(p => p < tp1 - price * 0.001).sort((a,b)=>b-a)[0];
+      const tp2Candidates = [...tp2SupArr.map(s=>s.avg), tp2Fib].filter(Boolean).sort((a,b)=>b-a);
+      const tp2 = tp2Candidates[0] || price * (1 - atrBuf * 3);
+
+      const risk = stop - entry;
+      const rr1 = risk > 0 ? ((entry - tp1) / risk).toFixed(1) : '—';
+      const rr2 = risk > 0 ? ((entry - tp2) / risk).toFixed(1) : '—';
+      levels = {
+        direction: 'sell', entry, stop, tp1, tp2,
+        tp1Pct: (((entry - tp1) / entry) * 100).toFixed(2),
+        tp2Pct: (((entry - tp2) / entry) * 100).toFixed(2),
+        stopPct: (((stop - entry) / entry) * 100).toFixed(2),
+        rrText: `نسبة المخاطرة للعائد: هدف١ = 1:${rr1} | هدف٢ = 1:${rr2}`,
+      };
+    }
+  }
+
+  return { score: netScore, pct, label, cls, reasons, levels, probability, confluenceCount, totalSignalCount };
+}
+
+/* ===================== Rendering ===================== */
+
+function drawLineChart(canvasId, candles, accentColor){
+  const canvas = $(canvasId);
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  const w = rect.width, h = rect.height || 120;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+
+  const slice = candles.slice(-60);
+  if(slice.length < 2) return;
+  const closes = slice.map(c => c.close);
+  const max = Math.max(...closes), min = Math.min(...closes);
+  const range = (max - min) || 1;
+  const stepX = w / (slice.length - 1);
+  const yFor = v => h - ((v - min) / range) * h * 0.82 - h * 0.09;
+
+  const grad = ctx.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, accentColor + '4D');
+  grad.addColorStop(1, accentColor + '00');
+
+  ctx.beginPath();
+  slice.forEach((c, i) => {
+    const x = i * stepX, y = yFor(c.close);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+
+  ctx.beginPath();
+  slice.forEach((c, i) => {
+    const x = i * stepX, y = yFor(c.close);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = accentColor;
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+}
+
+function drawMacdChart(macd){
+  const canvas = $('macdChart');
+  if(!canvas || !macd) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  const w = rect.width, h = rect.height || 64;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+
+  const hist = macd.histogram.slice(-40);
+  if(!hist.length) return;
+  const maxAbs = Math.max(...hist.map(Math.abs)) || 1;
+  const barW = w / hist.length;
+
+  hist.forEach((v, i) => {
+    const x = i * barW;
+    const barH = (Math.abs(v) / maxAbs) * (h / 2 - 6);
+    const y = v >= 0 ? h / 2 - barH : h / 2;
+    ctx.fillStyle = v >= 0 ? '#34C796' : '#E55B5B';
+    ctx.fillRect(x + 1, y, Math.max(1, barW - 2), barH);
+  });
+
+  ctx.strokeStyle = 'rgba(236,233,226,0.15)';
+  ctx.beginPath(); ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2); ctx.stroke();
+}
+
+function renderReasons(reasons){
+  const ul = $('reasonsList');
+  ul.innerHTML = '';
+  if(!reasons.length){
+    ul.innerHTML = '<li class="reason-placeholder">لا تتوفر بيانات كافية للتحليل بعد.</li>';
+    return;
+  }
+  reasons.forEach(r => {
+    const li = document.createElement('li');
+    li.className = r.bias;
+    li.textContent = r.text;
+    ul.appendChild(li);
+  });
+}
+
+function renderFibList(fib, price){
+  const ul = $('fibList');
+  ul.innerHTML = '';
+  if(!fib){ ul.innerHTML = '<li class="level-item">—</li>'; return; }
+  // Show only the 3 strongest levels: the classic high-probability ratios
+  // (38.2 / 50 / 61.8) ranked by proximity to current price — these are the
+  // levels traders actually watch, not the full raw fib ladder.
+  const keyPcts = [0.382, 0.5, 0.618];
+  const top3 = fib.levels
+    .filter(l => keyPcts.includes(l.pct))
+    .sort((a,b) => Math.abs(price - a.price) - Math.abs(price - b.price));
+  top3.forEach((l, i) => {
+    const near = Math.abs(price - l.price) / price < 0.006;
+    const li = document.createElement('li');
+    li.className = 'level-item' + (near ? ' level-near' : '');
+    const rankBadge = i === 0 ? '⭐ ' : '';
+    li.innerHTML = `<span class="level-pct">${rankBadge}${(l.pct * 100).toFixed(1)}%</span><span class="level-price">${formatPrice(l.price)}</span>`;
+    ul.appendChild(li);
+  });
+}
+
+function renderSRList(sr, price){
+  const ul = $('srList');
+  ul.innerHTML = '';
+  if(!sr || (!sr.supports.length && !sr.resistances.length)){
+    ul.innerHTML = '<li class="level-item">لا تتوفر مستويات كافية بعد</li>';
+    return;
+  }
+  sr.resistances.slice().reverse().forEach(r => {
+    const li = document.createElement('li');
+    li.className = 'level-item level-res';
+    li.innerHTML = `<span class="level-tag">مقاومة</span><span class="level-price">${formatPrice(r.avg)}</span><span class="level-strength">قوة ${r.strength}×</span>`;
+    ul.appendChild(li);
+  });
+  sr.supports.forEach(s => {
+    const li = document.createElement('li');
+    li.className = 'level-item level-sup';
+    li.innerHTML = `<span class="level-tag">دعم</span><span class="level-price">${formatPrice(s.avg)}</span><span class="level-strength">قوة ${s.strength}×</span>`;
+    ul.appendChild(li);
+  });
+}
+
+function renderTradeLevels(levels){
+  const el = $('tradeLevels');
+  if(!levels){ el.classList.add('hidden'); return; }
+  el.classList.remove('hidden');
+  $('tlEntry').textContent = formatPrice(levels.entry);
+  $('tlStop').textContent = `${formatPrice(levels.stop)} (${levels.stopPct}%)`;
+  $('tlTp1').textContent = formatPrice(levels.tp1);
+  $('tlTp1Pct').textContent = `+${levels.tp1Pct}%`;
+  $('tlTp2').textContent = formatPrice(levels.tp2);
+  $('tlTp2Pct').textContent = `+${levels.tp2Pct}%`;
+  $('tlRR').innerHTML = `<strong>${levels.rrText}</strong>`;
+}
+
+// Draw a small SVG representation of the last 3 candles that formed the pattern,
+// so the user can visually see the exact shape being referenced.
+function renderCandleSVG(candles){
+  const last3 = candles.slice(-3);
+  if(last3.length < 3) return '';
+  const allHigh = Math.max(...last3.map(c => c.high));
+  const allLow = Math.min(...last3.map(c => c.low));
+  const range = (allHigh - allLow) || 1;
+  const W = 120, H = 90, pad = 8;
+  const usableH = H - pad * 2;
+  const yFor = v => pad + (1 - (v - allLow) / range) * usableH;
+  const slotW = W / 3;
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" class="candle-svg" xmlns="http://www.w3.org/2000/svg">`;
+  last3.forEach((c, i) => {
+    const cx = slotW * i + slotW / 2;
+    const bodyTop = yFor(Math.max(c.open, c.close));
+    const bodyBottom = yFor(Math.min(c.open, c.close));
+    const bodyH = Math.max(1.5, bodyBottom - bodyTop);
+    const isUp = c.close >= c.open;
+    const color = isUp ? '#34C796' : '#E55B5B';
+    const bodyW = slotW * 0.42;
+    svg += `<line x1="${cx}" y1="${yFor(c.high)}" x2="${cx}" y2="${yFor(c.low)}" stroke="${color}" stroke-width="1.5"/>`;
+    svg += `<rect x="${cx - bodyW/2}" y="${bodyTop}" width="${bodyW}" height="${bodyH}" fill="${color}" rx="1"/>`;
+  });
+  svg += `</svg>`;
+  return svg;
+}
+
+// Lightweight chart-pattern detector: scans recent swing highs/lows for
+// double top/bottom and simple triangle (converging highs/lows) formations.
+function detectChartPattern(candles){
+  const slice = candles.slice(-40);
+  if(slice.length < 20) return null;
+
+  // find swing points (local extrema over a 3-candle window)
+  const highs = [], lows = [];
+  for(let i = 2; i < slice.length - 2; i++){
+    const w = slice.slice(i - 2, i + 3);
+    if(slice[i].high === Math.max(...w.map(c => c.high))) highs.push({ i, price: slice[i].high });
+    if(slice[i].low === Math.min(...w.map(c => c.low))) lows.push({ i, price: slice[i].low });
+  }
+
+  // Double top: two comparable swing highs with a pullback between them
+  if(highs.length >= 2){
+    const [h1, h2] = highs.slice(-2);
+    if(Math.abs(h1.price - h2.price) / h1.price < 0.004 && h2.i - h1.i >= 4){
+      return { name: 'قمة مزدوجة (Double Top)', bias: 'bear', desc: 'قمتان متقاربتان بمستوى سعري شبه متطابق — نمط انعكاسي هبوطي كلاسيكي بعد اتجاه صاعد.' };
+    }
+  }
+  // Double bottom
+  if(lows.length >= 2){
+    const [l1, l2] = lows.slice(-2);
+    if(Math.abs(l1.price - l2.price) / l1.price < 0.004 && l2.i - l1.i >= 4){
+      return { name: 'قاع مزدوج (Double Bottom)', bias: 'bull', desc: 'قاعان متقاربان بمستوى سعري شبه متطابق — نمط انعكاسي صعودي كلاسيكي بعد اتجاه هابط.' };
+    }
+  }
+  // Converging triangle: last 3 highs descending AND last 3 lows ascending
+  if(highs.length >= 3 && lows.length >= 3){
+    const h3 = highs.slice(-3), l3 = lows.slice(-3);
+    const highsDesc = h3[0].price > h3[1].price && h3[1].price > h3[2].price;
+    const lowsAsc = l3[0].price < l3[1].price && l3[1].price < l3[2].price;
+    if(highsDesc && lowsAsc){
+      return { name: 'مثلث متماثل (Symmetrical Triangle)', bias: 'neutral', desc: 'تضيّق نطاق التداول بين قمم هابطة وقيعان صاعدة — يسبق غالبًا اختراقًا قويًا في أي اتجاه، يُفضّل انتظار كسر واضح.' };
+    }
+  }
+  return null;
+}
+
+function renderAll({ asset, livePrice, changePercent, sourceLabel, candles, rsi, macd, fib, sr, candlePattern, rec, stoch, adx, boll, emaTrend, renderLevels = true }){
+  const accent = ACCENT.gold;
+
+  $('priceValue').textContent = formatPrice(livePrice);
+  const chEl = $('priceChange');
+  const sign = changePercent >= 0 ? '+' : '';
+  chEl.textContent = `${sign}${changePercent.toFixed(2)}%`;
+  chEl.className = 'price-change ' + (changePercent >= 0 ? 'up' : 'down');
+  $('priceSource').textContent = sourceLabel;
+  $('priceUpdated').textContent = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+
+  drawLineChart('priceChart', candles, accent);
+
+  $('recBadge').textContent = rec.label;
+  $('recBadge').className = 'rec-badge ' + rec.cls;
+  const needlePos = 50 - (rec.pct / 100) * 50;
+  $('gaugeNeedle').style.right = `${Math.max(2, Math.min(98, needlePos))}%`;
+
+  // Probability + confluence strength display
+  const probEl = $('probabilityBadge');
+  if(probEl){
+    if(rec.probability != null){
+      probEl.classList.remove('hidden');
+      probEl.innerHTML = `🎯 احتمالية نجاح الصفقة: <strong>${rec.probability}%</strong> <span class="prob-confluence">(${rec.confluenceCount}/${rec.totalSignalCount} مؤشرات متوافقة)</span>`;
+      probEl.className = 'probability-badge ' + (rec.label.includes('شراء') ? 'prob-buy' : rec.label.includes('بيع') ? 'prob-sell' : 'prob-neutral');
+    } else {
+      probEl.classList.add('hidden');
+    }
+  }
+
+  renderReasons(rec.reasons);
+  if(renderLevels) renderTradeLevels(rec.levels);
+
+  if(rsi != null){
+    $('rsiValue').textContent = rsi.toFixed(1);
+    $('rsiMarker').style.right = `${100 - rsi}%`;
+    $('rsiNote').textContent =
+      rsi <= 30 ? 'تشبع بيعي — منطقة ارتداد محتملة.' :
+      rsi >= 70 ? 'تشبع شرائي — منطقة تصحيح محتملة.' :
+      'لا توجد إشارة تشبع حاليًا.';
+  } else {
+    $('rsiValue').textContent = '';
+    $('rsiNote').textContent = 'بيانات غير كافية بعد.';
+  }
+  drawMacdChart(macd);
+  if(macd){
+    const last = macd.histogram[macd.histogram.length - 1];
+    $('macdNote').textContent = last > 0 ? 'الهيستوجرام موجب — زخم صعودي.' : 'الهيستوجرام سالب — زخم هبوطي.';
+  } else {
+    $('macdNote').textContent = 'بيانات غير كافية بعد.';
+  }
+
+  renderFibList(fib, livePrice);
+  renderSRList(sr, livePrice);
+
+  const cpEl = $('candlePattern');
+  if(candlePattern){
+    cpEl.className = 'candle-pattern ' + candlePattern.bias;
+    const signalLabel = candlePattern.bias === 'bull' ? '📈 شراء' : candlePattern.bias === 'bear' ? '📉 بيع' : '➡️ محايد';
+    const descMap = {
+      'ابتلاع صعودي': 'يعكس ضغط الشراء ويؤشر على انعكاس صعودي.',
+      'ابتلاع هبوطي': 'يعكس ضغط البيع ويؤشر على انعكاس هبوطي.',
+      'نموذج المطرقة': 'رفض السعر لمستويات أدنى — إشارة دعم قوية.',
+      'النجمة الهابطة': 'رفض السعر لمستويات أعلى — إشارة مقاومة.',
+      'نجمة الصباح': 'نمط انعكاس صعودي بعد اتجاه هبوطي.',
+      'نجمة المساء': 'نمط انعكاس هبوطي بعد اتجاه صعودي.',
+      'الجنود الثلاثة البيض': 'ثلاث شمعات صاعدة متتالية — زخم قوي.',
+      'الغربان الثلاثة السود': 'ثلاث شمعات هابطة متتالية — ضعف واضح.',
+      'دوجي (تردد)': 'توازن بين المشترين والبائعين — انتظر التأكيد.',
+    };
+    const desc = descMap[candlePattern.name] || '';
+    const svgHtml = renderCandleSVG(candles);
+    cpEl.innerHTML = `
+      <div class="candle-visual-row">
+        <div class="candle-svg-box">${svgHtml}</div>
+        <div class="candle-pattern-info">
+          <span class="candle-pattern-name">${escapeHtml(candlePattern.name)}</span>
+          <span class="candle-timeframe-tag">🕐 فريم الساعة (1H)</span>
+          ${desc ? `<span class="candle-pattern-desc">${escapeHtml(desc)}</span>` : ''}
+        </div>
+      </div>
+      <span class="candle-signal-badge">${signalLabel}</span>`;
+  }
+
+  // Chart pattern (double top/bottom, triangle) rendered below the candlestick section
+  const chartPatternEl = $('chartPattern');
+  if(chartPatternEl){
+    const cp = detectChartPattern(candles);
+    if(cp){
+      const label = cp.bias === 'bull' ? '📈 شراء' : cp.bias === 'bear' ? '📉 بيع' : '➡️ انتظار كسر';
+      chartPatternEl.classList.remove('hidden');
+      chartPatternEl.className = 'chart-pattern-box ' + cp.bias;
+      chartPatternEl.innerHTML = `
+        <div class="chart-pattern-info">
+          <span class="candle-pattern-name">${escapeHtml(cp.name)}</span>
+          <span class="candle-pattern-desc">${escapeHtml(cp.desc)}</span>
+        </div>
+        <span class="candle-signal-badge">${label}</span>`;
+    } else {
+      chartPatternEl.classList.remove('hidden');
+      chartPatternEl.className = 'chart-pattern-box neutral';
+      chartPatternEl.innerHTML = `<div class="chart-pattern-info"><span class="candle-pattern-desc">لا يوجد نمط فني واضح (قمة مزدوجة/قاع مزدوج/مثلث) متشكل حاليًا على فريم الساعة.</span></div>`;
+    }
+  }
+}
+
+/* ===================== Economic Calendar ===================== */
+
+const EVENT_NAMES_AR = {
+  'Non-Farm Employment Change': 'التغير في الوظائف غير الزراعية',
+  'ADP Non-Farm Employment Change': 'تغير التوظيف ADP',
+  'Unemployment Rate': 'معدل البطالة',
+  'Initial Jobless Claims': 'طلبات إعانة البطالة الأولية',
+  'Continuing Jobless Claims': 'طلبات البطالة المستمرة',
+  'CPI m/m': 'مؤشر أسعار المستهلكين (شهري)',
+  'Core CPI m/m': 'مؤشر أسعار المستهلكين الأساسي (شهري)',
+  'CPI y/y': 'مؤشر أسعار المستهلكين (سنوي)',
+  'PPI m/m': 'مؤشر أسعار المنتجين (شهري)',
+  'Core PCE Price Index m/m': 'مؤشر PCE الأساسي للتضخم',
+  'PCE Price Index m/m': 'مؤشر PCE للتضخم',
+  'GDP q/q': 'الناتج المحلي الإجمالي (ربع سنوي)',
+  'Prelim GDP q/q': 'الناتج المحلي الإجمالي الأولي',
+  'Final GDP q/q': 'الناتج المحلي الإجمالي النهائي',
+  'Retail Sales m/m': 'مبيعات التجزئة (شهري)',
+  'Core Retail Sales m/m': 'مبيعات التجزئة الأساسية (شهري)',
+  'ISM Manufacturing PMI': 'مؤشر PMI التصنيعي (ISM)',
+  'ISM Services PMI': 'مؤشر PMI الخدمي (ISM)',
+  'FOMC Statement': 'بيان لجنة الفيدرالي (FOMC)',
+  'FOMC Meeting Minutes': 'محضر اجتماع الفيدرالي',
+  'Federal Funds Rate': 'سعر الفائدة الفيدرالي',
+  'Consumer Confidence': 'ثقة المستهلك',
+  'Trade Balance': 'الميزان التجاري',
+  'Durable Goods Orders m/m': 'طلبيات السلع المعمرة (شهري)',
+  'Average Hourly Earnings m/m': 'متوسط الأجر الساعي (شهري)',
+  'Powell Speaks': 'خطاب رئيس الفيدرالي باول',
+  'Existing Home Sales': 'مبيعات المنازل القائمة',
+  'New Home Sales': 'مبيعات المنازل الجديدة',
+  'Housing Starts': 'تصاريح البناء',
+  'Building Permits': 'تصاريح البناء الجديدة',
+  'Industrial Production m/m': 'الإنتاج الصناعي (شهري)',
+  'Factory Orders m/m': 'طلبيات المصانع (شهري)',
+  'Empire State Manufacturing Index': 'مؤشر تصنيع نيويورك',
+  'Philly Fed Manufacturing Index': 'مؤشر تصنيع فيلادلفيا',
+  'CB Consumer Confidence': 'ثقة المستهلك (CB)',
+  'Michigan Consumer Sentiment': 'ثقة المستهلك (ميشيغان)',
+};
+
+function translateEventName(name){
+  // Try exact match first
+  if(EVENT_NAMES_AR[name]) return EVENT_NAMES_AR[name];
+  // Try partial match
+  for(const [en, ar] of Object.entries(EVENT_NAMES_AR)){
+    if(name.toLowerCase().includes(en.toLowerCase())) return ar;
+  }
+  return name;
+}
+
+// Determine if higher value is good for USD (true) or bad (true for inverted metrics)
+const INVERTED_METRICS = ['unemployment rate','jobless claims','trade deficit','unemployment'];
+
+function isInverted(name){
+  const lower = name.toLowerCase();
+  return INVERTED_METRICS.some(k => lower.includes(k));
+}
+
+function parseNumber(str){
+  if(!str || str === '' || str === 'N/A') return null;
+  // remove K, M, B, %, $ suffixes and parse
+  return parseFloat(str.replace(/[KkMmBb%$,]/g,''));
+}
+
+function assessCalendarImpact(event){
+  const actual = parseNumber(event.actual);
+  const forecast = parseNumber(event.forecast);
+  const prev = parseNumber(event.previous);
+  const name = (event.title || '').toLowerCase();
+
+  if(actual === null) return null; // not released yet
+
+  const isInflation = name.includes('cpi') || name.includes('pce') || name.includes('ppi') || name.includes('inflation');
+
+  let usdBias, goldBias, verdictText;
+
+  if(forecast !== null){
+    const beat = isInverted(event.title) ? actual < forecast : actual > forecast;
+    const miss = isInverted(event.title) ? actual > forecast : actual < forecast;
+
+    if(isInflation){
+      // Higher inflation = gold positive (hedge), USD mixed
+      if(beat){
+        usdBias = 'mixed'; goldBias = 'pos';
+        verdictText = 'التضخم فوق التوقعات — إيجابي للذهب كملاذ آمن، الدولار تحت ضغط.';
+      } else if(miss){
+        usdBias = 'pos'; goldBias = 'neg';
+        verdictText = 'التضخم دون التوقعات — يضعف حجة الفيدرالي لرفع الفائدة، سلبي للذهب.';
+      } else {
+        usdBias = 'neu'; goldBias = 'neu';
+        verdictText = 'التضخم جاء متوافقًا مع التوقعات — تأثير محدود.';
+      }
+    } else if(name.includes('fomc') || name.includes('federal funds') || name.includes('powell')){
+      usdBias = 'vol'; goldBias = 'vol';
+      verdictText = 'حدث الفيدرالي — توقع تقلبات حادة في الذهب والدولار عند الإعلان.';
+    } else {
+      // Standard economic data
+      if(beat){
+        usdBias = 'pos'; goldBias = 'neg';
+        verdictText = 'البيانات فاقت التوقعات — إيجابي للدولار، سلبي للذهب على المدى القصير.';
+      } else if(miss){
+        usdBias = 'neg'; goldBias = 'pos';
+        verdictText = 'البيانات جاءت دون التوقعات — سلبي للدولار، قد يدعم الذهب كملاذ آمن.';
+      } else {
+        usdBias = 'neu'; goldBias = 'neu';
+        verdictText = 'البيانات جاءت متوافقة مع التوقعات — تأثير محدود على الأسواق.';
+      }
+    }
+  } else {
+    // Compare with previous if no forecast
+    if(prev !== null){
+      const up = isInverted(event.title) ? actual < prev : actual > prev;
+      usdBias = up ? 'pos' : 'neg';
+      goldBias = up ? 'neg' : 'pos';
+      verdictText = up
+        ? 'أفضل من القراءة السابقة — يدعم الدولار ويضغط على الذهب.'
+        : 'أضعف من القراءة السابقة — يضغط على الدولار ويدعم الذهب.';
+    } else {
+      usdBias = 'neu'; goldBias = 'neu';
+      verdictText = 'لا يتوفر تقدير مسبق للمقارنة.';
+    }
+  }
+  return { usdBias, goldBias, verdictText };
+}
+
+const BIAS_LABEL = {
+  pos: { text:'إيجابي', cls:'impact-gold-pos' },
+  neg: { text:'سلبي',   cls:'impact-gold-neg' },
+  neu: { text:'محايد',  cls:'impact-gold-neu' },
+  mixed:{ text:'مختلط', cls:'impact-gold-neu' },
+  vol: { text:'تقلبات حادة', cls: 'impact-gold-neg' },
+};
+
+function normalizeTEEvent(e){
+  // TradingEconomics fields: Date, Country, Category/Event, Actual, Forecast, Previous, Importance(1/2/3)
+  const impactMap = { 1: 'Low', 2: 'Medium', 3: 'High' };
+  return {
+    title: e.Event || e.Category || '—',
+    country: 'USD',
+    date: e.Date,
+    impact: impactMap[e.Importance] || 'Low',
+    actual: (e.Actual === null || e.Actual === undefined) ? '' : String(e.Actual),
+    forecast: (e.Forecast === null || e.Forecast === undefined) ? '' : String(e.Forecast),
+    previous: (e.Previous === null || e.Previous === undefined) ? '' : String(e.Previous),
+  };
+}
+
+async function fetchFromTradingEconomics(){
+  const today = new Date();
+  const start = new Date(today); start.setDate(start.getDate() - 1);
+  const end = new Date(today); end.setDate(end.getDate() + 7);
+  const fmt = d => d.toISOString().slice(0, 10);
+  const directUrl = `https://api.tradingeconomics.com/calendar/country/united%20states/${fmt(start)}/${fmt(end)}?c=guest:guest&f=json`;
+  const urls = [
+    directUrl,
+    'https://api.allorigins.win/raw?url=' + encodeURIComponent(directUrl),
+    'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(directUrl),
+  ];
+  let lastError = null;
+  for(const url of urls){
+    try{
+      const res = await fetch(url, { cache: 'no-store' });
+      if(!res.ok) throw new Error('TE bad status ' + res.status);
+      const raw = await res.json();
+      if(!Array.isArray(raw)) throw new Error('TE unexpected response');
+      const events = raw
+        .filter(e => e.Importance === 3) // highest impact only (3 bulls)
+        .map(normalizeTEEvent)
+        .map(e => ({ ...e, dateObj: new Date(e.date) }))
+        .sort((a,b) => a.dateObj - b.dateObj);
+      if(events.length) return events;
+      throw new Error('TE empty result');
+    }catch(e){ lastError = e; continue; }
+  }
+  throw lastError || new Error('TE: تعذر التحميل من كل المصادر');
+}
+
+async function fetchFromForexFactory(){
+  const directUrl = 'https://nfs.faireconomy.media/ff_calendar_thisweek.json';
+  const proxies = [
+    directUrl,
+    'https://api.allorigins.win/raw?url=' + encodeURIComponent(directUrl),
+    'https://corsproxy.io/?' + encodeURIComponent(directUrl),
+    'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(directUrl),
+    'https://r.jina.ai/' + directUrl,
+  ];
+  let lastError = null;
+  for(const url of proxies){
+    try{
+      const res = await fetch(url, { cache: 'no-store' });
+      if(!res.ok) throw new Error('bad status ' + res.status);
+      const text = await res.text();
+      const all = JSON.parse(text);
+      if(!Array.isArray(all)) throw new Error('unexpected response (rate-limited or blocked)');
+      const events = all
+        .filter(e => e.country === 'USD' && e.impact === 'High')
+        .map(e => ({ ...e, dateObj: new Date(e.date) }))
+        .sort((a,b) => a.dateObj - b.dateObj);
+      if(events.length) return events;
+      throw new Error('FF empty result');
+    }catch(e){ lastError = e; continue; }
+  }
+  throw lastError || new Error('FF: تعذر التحميل من كل المصادر');
+}
+
+function filterToToday(events){
+  const now = new Date();
+  const todayStr = now.toDateString();
+  return events.filter(e => e.dateObj.toDateString() === todayStr);
+}
+
+async function fetchEconomicCalendar(){
+  // Primary: TradingEconomics (no aggressive rate-limit, CORS-friendly guest API)
+  try{
+    const events = await fetchFromTradingEconomics();
+    const today = filterToToday(events);
+    if(today.length) return today;
+  }catch(e1){ /* fall through */ }
+
+  // Fallback: ForexFactory through proxy chain
+  try{
+    const events = await fetchFromForexFactory();
+    const today = filterToToday(events);
+    if(today.length) return today;
+  }catch(e2){ /* fall through */ }
+
+  throw new Error('لا توجد أحداث عالية التأثير على الدولار اليوم، أو تعذر تحميل التقويم من كل المصادر المتاحة');
+}
+
+let _calendarReminders = [];
+
+function scheduleReminders(events){
+  // Clear old timeouts
+  _calendarReminders.forEach(t => clearTimeout(t));
+  _calendarReminders = [];
+
+  if(Notification.permission !== 'granted') return;
+
+  const now = Date.now();
+  events.forEach(ev => {
+    const evTime = ev.dateObj.getTime();
+    const msTo15 = evTime - 15*60*1000 - now;
+    const msTo5  = evTime -  5*60*1000 - now;
+    const nameAr = translateEventName(ev.title);
+
+    if(msTo15 > 0){
+      _calendarReminders.push(setTimeout(() => {
+        new Notification('⏰ حدث اقتصادي خلال 15 دقيقة', {
+          body: `🇺🇸 ${nameAr}\nالتقدير: ${ev.forecast || '—'} | السابق: ${ev.previous || '—'}`,
+          icon: 'data:image/png;base64,iVBORw0KGgo=',
+          tag: 'nabd-cal-15-' + ev.date,
+        });
+      }, msTo15));
+    }
+    if(msTo5 > 0){
+      _calendarReminders.push(setTimeout(() => {
+        new Notification('🔴 حدث اقتصادي خلال 5 دقائق!', {
+          body: `🇺🇸 ${nameAr}`,
+          icon: 'data:image/png;base64,iVBORw0KGgo=',
+          tag: 'nabd-cal-5-' + ev.date,
+          requireInteraction: true,
+        });
+      }, msTo5));
+    }
+  });
+}
+
+function formatEventTime(date){
+  const now = new Date();
+  const sameDay = date.toDateString() === now.toDateString();
+  const timeStr = date.toLocaleTimeString('ar-EG', { hour:'2-digit', minute:'2-digit' });
+  if(!sameDay){
+    const dayStr = date.toLocaleDateString('ar-EG', { weekday:'short', month:'short', day:'numeric' });
+    return `${dayStr} ${timeStr}`;
+  }
+  return timeStr;
+}
+
+function getCountdownText(dateObj){
+  const diff = dateObj.getTime() - Date.now();
+  if(diff <= 0) return null;
+  const totalMin = Math.floor(diff / 60000);
+  if(totalMin < 60) return `خلال ${totalMin} دقيقة`;
+  const hrs = Math.floor(totalMin / 60);
+  const mins = totalMin % 60;
+  return `خلال ${hrs} س ${mins > 0 ? mins + ' د' : ''}`;
+}
+
+function impactBulls(impact){
+  // Since we only fetch 'High' impact USD events now, always show 3 bulls (max strength)
+  // Kept as a function in case medium/low ever get included again.
+  const level = impact === 'High' ? 3 : impact === 'Medium' ? 2 : 1;
+  return '🐂'.repeat(level) + '🤍'.repeat(3 - level);
+}
+
+function renderCalendar(events){
+  const ul = $('calendarList');
+  ul.innerHTML = '';
+  if(!events.length){
+    ul.innerHTML = '<li class="news-loading">لا توجد أحداث عالية التأثير على الدولار هذا الأسبوع.</li>';
+    return;
+  }
+
+  const now = Date.now();
+
+  events.forEach(ev => {
+    const evTime = ev.dateObj.getTime();
+    const isReleased = ev.actual && ev.actual !== '';
+    const minsAway = (evTime - now) / 60000;
+    const isSoon = !isReleased && minsAway >= 0 && minsAway <= 60;
+    const isPast = evTime < now && !isReleased;
+    const impact = isReleased ? assessCalendarImpact(ev) : null;
+    const nameAr = translateEventName(ev.title);
+    const countdown = !isReleased ? getCountdownText(ev.dateObj) : null;
+
+    const actual = ev.actual || '';
+    const forecast = ev.forecast || '';
+    const previous = ev.previous || '';
+    const actualNum = parseNumber(actual);
+    const forecastNum = parseNumber(forecast);
+    let actualCls = 'no-data';
+    if(actual){
+      if(forecastNum !== null && actualNum !== null){
+        const beat = isInverted(ev.title) ? actualNum < forecastNum : actualNum > forecastNum;
+        actualCls = beat ? 'actual-beat' : (actualNum === forecastNum ? 'actual-inline' : 'actual-miss');
+      } else {
+        actualCls = 'actual-inline';
+      }
+    }
+
+    const li = document.createElement('li');
+    li.className = `cal-event impact-${(ev.impact||'high').toLowerCase()} ${isReleased ? 'cal-released' : isSoon ? 'cal-countdown' : 'cal-upcoming'}`;
+
+    const dotCls = isReleased ? 'released' : (isSoon ? 'soon' : 'upcoming');
+    const dotLabel = isReleased ? 'صدر الآن' : (isPast ? 'انتهى' : 'قادم');
+
+    let countdownHtml = '';
+    if(countdown && minsAway <= 120){
+      countdownHtml = `<div class="cal-countdown-bar">⏱ ${countdown}</div>`;
+    }
+
+    let impactHtml = '';
+    if(impact){
+      const gInfo = BIAS_LABEL[impact.goldBias] || BIAS_LABEL.neu;
+      const uInfo = BIAS_LABEL[impact.usdBias] || BIAS_LABEL.neu;
+      impactHtml = `
+        <div class="cal-impact-row">
+          <span class="cal-impact-label ${gInfo.cls}">🟡 ${gInfo.text} للذهب</span>
+          <span class="cal-impact-label ${uInfo.cls}">💵 ${uInfo.text} للدولار</span>
+        </div>
+        <div class="cal-verdict">👉 ${escapeHtml(impact.verdictText)}</div>`;
+    }
+
+    li.innerHTML = `
+      <div class="cal-event-top">
+        <span class="cal-status-dot ${dotCls}" title="${dotLabel}"></span>
+        <span class="cal-event-name">🇺🇸 ${escapeHtml(nameAr)}</span>
+        <span class="cal-event-time">${formatEventTime(ev.dateObj)}</span>
+      </div>
+      <div class="cal-bulls-row">
+        <span class="cal-bulls">${impactBulls(ev.impact)}</span>
+        <span class="cal-bulls-label">أقصى تأثير على الدولار</span>
+      </div>
+      ${countdownHtml}
+      <div class="cal-values">
+        <div class="cal-val-box">
+          <span class="cal-val-label">■ السابق</span>
+          <span class="cal-val-num ${previous ? '' : 'no-data'}">${escapeHtml(previous || '—')}</span>
+        </div>
+        <div class="cal-val-box">
+          <span class="cal-val-label">■ التقدير</span>
+          <span class="cal-val-num ${forecast ? '' : 'no-data'}">${escapeHtml(forecast || '—')}</span>
+        </div>
+        <div class="cal-val-box">
+          <span class="cal-val-label">▪ الحالي</span>
+          <span class="cal-val-num ${actualCls}">${actual ? escapeHtml(actual) : '—'}</span>
+        </div>
+      </div>
+      ${impactHtml}`;
+
+    ul.appendChild(li);
+  });
+}
+
+function updateFundamentalNote(events){
+  const el = $('fundamentalNote');
+  if(!el) return;
+  if(!events || !events.length){
+    el.textContent = 'لا توجد أخبار عالية التأثير على الدولار اليوم — المشهد الأساسي هادئ نسبيًا، والتحليل الفني وحده هو المرجع الأساسي للقرار حاليًا.';
+    return;
+  }
+  const now = Date.now();
+  const upcoming = events.filter(e => e.dateObj.getTime() > now && !(e.actual && e.actual !== ''));
+  const released = events.filter(e => e.actual && e.actual !== '');
+
+  let parts = [];
+  if(released.length){
+    const lastReleased = released[released.length - 1];
+    const impact = assessCalendarImpact(lastReleased);
+    parts.push(`آخر بيانات صادرة اليوم (${translateEventName(lastReleased.title)}) جاءت بتأثير ${BIAS_LABEL[impact.usdBias]?.text || 'محايد'} على الدولار.`);
+  }
+  if(upcoming.length){
+    const next = upcoming[0];
+    const mins = Math.round((next.dateObj.getTime() - now) / 60000);
+    const timeTxt = mins < 60 ? `خلال ${mins} دقيقة` : `الساعة ${formatEventTime(next.dateObj)}`;
+    parts.push(`⚠️ يُنتظر صدور "${translateEventName(next.title)}" ${timeTxt} — يُفضّل توخي الحذر وتجنب فتح صفقات جديدة قبل صدور الخبر مباشرة لتقلب السيولة المتوقع حوله.`);
+  }
+  if(!parts.length){
+    parts.push('صدرت أخبار الدولار عالية التأثير المجدولة لهذا اليوم بالفعل، ولا يوجد حدث جديد متبقٍ — التحليل الفني هو المرجع الأساسي الآن.');
+  }
+  el.textContent = '🧠 ' + parts.join(' ');
+}
+
+async function loadCalendar(){
+  try{
+    const events = await fetchEconomicCalendar();
+    renderCalendar(events);
+    updateFundamentalNote(events);
+    scheduleReminders(events);
+    // refresh countdown text every minute
+    clearInterval(state.calendarTimer);
+    state.calendarTimer = setInterval(() => renderCalendar(events), 60000);
+  }catch(e){
+    $('calendarList').innerHTML = `
+      <li class="news-error">
+        ${escapeHtml(e.message || 'تعذر تحميل التقويم الاقتصادي من كل المصادر المتاحة حاليًا.')}
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+          <button type="button" class="cal-retry-btn">🔄 إعادة المحاولة</button>
+          <a href="https://www.investing.com/economic-calendar/" target="_blank" rel="noopener" class="cal-external-link">🌐 فتح التقويم في investing.com</a>
+        </div>
+      </li>`;
+    const retryBtn = document.querySelector('.cal-retry-btn');
+    if(retryBtn) retryBtn.addEventListener('click', loadCalendar);
+    updateFundamentalNote(null);
+  }
+}
+
+async function requestNotifPermission(){
+  if(!('Notification' in window)){
+    $('notifStatus').textContent = 'المتصفح لا يدعم الإشعارات.';
+    return;
+  }
+  const perm = await Notification.requestPermission();
+  if(perm === 'granted'){
+    $('notifStatus').textContent = '✅ سيتم تنبيهك قبل كل حدث بـ 15 دقيقة وقبله بـ 5 دقائق.';
+    $('notifBtn').textContent = '🔔✅';
+    loadCalendar(); // reschedule with permission now granted
+  } else {
+    $('notifStatus').textContent = 'تم رفض الإشعارات من إعدادات المتصفح.';
+  }
+}
+
+
+
+async function loadAsset(asset, fullAnalysis = true){
+  if(state.loading) return;
+  state.loading = true;
+  try{
+    let candles, livePrice, changePercent, sourceLabel;
+
+    if(state.goldSource === 'twelvedata' && state.apiKey){
+      [candles, { price: livePrice, changePercent }] = await Promise.all([
+        fetchTwelveDataSeries(state.apiKey),
+        fetchTwelveDataPrice(state.apiKey),
+      ]);
+      sourceLabel = 'TwelveData · XAU/USD';
+    } else {
+      [candles, { price: livePrice, changePercent }] = await Promise.all([
+        fetchBinanceKlines(SYMBOLS.goldPaxg),
+        fetchBinanceTicker(SYMBOLS.goldPaxg),
+      ]);
+      sourceLabel = 'Binance · PAXG/USDT (بديل للذهب)';
+    }
+
+    state.candles.gold = candles;
+    const closes = candles.map(c => c.close);
+
+    // ---- Deep multi-indicator technical analysis ----
+    const rsi = computeRSI(closes);
+    const macd = computeMACD(closes);
+    const fib = computeFibonacci(candles);
+    const sr = computeSupportResistance(candles, livePrice);
+    const candlePattern = detectCandlePattern(candles);
+    const stoch = computeStochastic(candles);
+    const adx = computeADX(candles);
+    const boll = computeBollinger(closes);
+    const emaTrend = computeEMATrend(closes);
+    const atr = computeATR(candles);
+    const htfCandles = aggregateCandles(candles, 4); // synthetic 4H from 1H data
+    const htfEma = computeEMATrend(htfCandles.map(c => c.close));
+    const htfTrend = htfEma ? htfEma.aligned : null;
+
+    const rec = buildRecommendation({ rsi, macd, fib, sr, candle: candlePattern, price: livePrice, stoch, adx, boll, emaTrend, htfTrend, atr });
+
+    if(fullAnalysis){
+      // freeze the levels so they don't move with price ticks
+      state.frozenLevels.gold = rec.levels;
+      state.frozenAnalysisTime.gold = Date.now();
+      renderAll({ asset: 'gold', livePrice, changePercent, sourceLabel, candles, rsi, macd, fib, sr, candlePattern, rec, stoch, adx, boll, emaTrend, renderLevels: true });
+      updateAnalysisTimestamp('gold');
+    } else {
+      // price-only refresh: update price/chart/indicators but keep levels frozen
+      const recForDisplay = { ...rec, levels: state.frozenLevels.gold };
+      renderAll({ asset: 'gold', livePrice, changePercent, sourceLabel, candles, rsi, macd, fib, sr, candlePattern, rec: recForDisplay, stoch, adx, boll, emaTrend, renderLevels: false });
+    }
+  }catch(err){
+    showToast('تعذر تحديث البيانات: ' + err.message);
+  }finally{
+    state.loading = false;
+  }
+}
+
+function updateAnalysisTimestamp(asset){
+  const el = $('analysisTime');
+  if(!el) return;
+  const t = state.frozenAnalysisTime[asset];
+  if(t) el.textContent = `آخر تحليل: ${new Date(t).toLocaleTimeString('ar-EG', { hour:'2-digit', minute:'2-digit' })}`;
+}
+
+function startPolling(){
+  clearInterval(state.refreshTimer);
+  // polling only refreshes price (fullAnalysis = false)
+  const interval = state.goldSource === 'twelvedata' ? 60000 : 15000;
+  state.refreshTimer = setInterval(() => loadAsset('gold', false), interval);
+}
+
+/* ===================== Settings ===================== */
+
+function openSettings(){
+  document.querySelectorAll('input[name="goldSource"]').forEach(r => {
+    r.checked = r.value === state.goldSource;
+  });
+  $('apiKeyInput').value = state.apiKey;
+  $('apiKeyRow').classList.toggle('hidden', state.goldSource !== 'twelvedata');
+  $('settingsModal').classList.remove('hidden');
+}
+function closeSettings(){ $('settingsModal').classList.add('hidden'); }
+
+function saveSettings(){
+  const selected = document.querySelector('input[name="goldSource"]:checked').value;
+  const key = $('apiKeyInput').value.trim();
+  if(selected === 'twelvedata' && !key){
+    showToast('من فضلك أدخل مفتاح TwelveData أو اختر PAXG.');
+    return;
+  }
+  state.goldSource = selected;
+  state.apiKey = key;
+  localStorage.setItem('nabd_goldSource', selected);
+  localStorage.setItem('nabd_twelveDataKey', key);
+  closeSettings();
+  showToast('تم حفظ الإعدادات.');
+  loadAsset('gold', true);
+  startPolling();
+}
+
+/* ===================== Init ===================== */
+
+function init(){
+  const loader = document.getElementById('initLoader');
+  if(loader) loader.style.display='none';
+
+  $('settingsBtn').addEventListener('click', openSettings);
+  $('closeSettings').addEventListener('click', closeSettings);
+  $('saveSettings').addEventListener('click', saveSettings);
+  $('notifBtn').addEventListener('click', requestNotifPermission);
+  $('reAnalyzeBtn').addEventListener('click', () => {
+    showToast('جارٍ إعادة التحليل المعمق…');
+    loadAsset('gold', true);
+  });
+  $('settingsModal').addEventListener('click', e => { if(e.target.id === 'settingsModal') closeSettings(); });
+
+  document.querySelectorAll('input[name="goldSource"]').forEach(r => {
+    r.addEventListener('change', e => {
+      $('apiKeyRow').classList.toggle('hidden', e.target.value !== 'twelvedata');
+    });
+  });
+
+  window.addEventListener('resize', () => {
+    const candles = state.candles.gold;
+    if(candles && candles.length){
+      drawLineChart('priceChart', candles, ACCENT.gold);
+      const macd = computeMACD(candles.map(c => c.close));
+      drawMacdChart(macd);
+    }
+  });
+
+  loadAsset('gold', true);
+  startPolling();
+  loadCalendar();
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  try{ init(); }
+  catch(e){
+    var loader = document.getElementById('initLoader');
+    if(loader) loader.innerHTML = '<div style="color:#E55B5B;font-size:14px;direction:rtl;padding:20px;text-align:center;">⚠️ خطأ في التحميل:<br>' + e.message + '<br><br><small>' + e.stack + '</small></div>';
+  }
+});
+
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').then(reg => {
+        // If there's already a waiting worker (an update was downloaded
+        // on a previous visit), activate it now.
+        if(reg.waiting){
+          reg.waiting.postMessage('SKIP_WAITING');
+        }
+        // Watch for new updates found during this session.
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          if(!newWorker) return;
+          newWorker.addEventListener('statechange', () => {
+            if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
+              // A new version has been installed — reload once to use it.
+              window.location.reload();
+            }
+          });
+        });
+      }).catch(() => {});
+    });
+
+    // Reload the page automatically the first time the active
+    // service worker changes (covers the very first update after
+    // this fix ships).
+    let refreshed = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if(refreshed) return;
+      refreshed = true;
+      window.location.reload();
+    });
+  }
+</script>
+</body>
+</html>
