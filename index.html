@@ -7,7 +7,8 @@
 <meta name="description" content="نبض — متابعة حية لسعر الذهب والبيتكوين مع توصيات مبنية على تحليل فني وأساسي">
 <title>نبض | تتبع الذهب والبيتكوين</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>📈</text></svg>">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 
 <noscript></noscript>
 <style>
@@ -2239,34 +2240,7 @@ document.addEventListener('DOMContentLoaded', function(){
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').then(reg => {
-        // If there's already a waiting worker (an update was downloaded
-        // on a previous visit), activate it now.
-        if(reg.waiting){
-          reg.waiting.postMessage('SKIP_WAITING');
-        }
-        // Watch for new updates found during this session.
-        reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing;
-          if(!newWorker) return;
-          newWorker.addEventListener('statechange', () => {
-            if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
-              // A new version has been installed — reload once to use it.
-              window.location.reload();
-            }
-          });
-        });
-      }).catch(() => {});
-    });
-
-    // Reload the page automatically the first time the active
-    // service worker changes (covers the very first update after
-    // this fix ships).
-    let refreshed = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if(refreshed) return;
-      refreshed = true;
-      window.location.reload();
+      navigator.serviceWorker.register('sw.js').catch(() => {});
     });
   }
 </script>
